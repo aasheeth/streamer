@@ -1,23 +1,30 @@
 // src/App.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './App.css';
 import DataStreamer from './components/DataStreamer';
 import PluginSelector from './components/PluginSelector';
 import DataVisualizer from './components/DataVisualizer';
-import { fetchPlugins } from './services/api';
+import { DataContext } from './context/DataContext';
+import DataDashboard from './components/DataDashboard';
 
 function App() {
+  const { data } = useContext(DataContext);
   const [plugins, setPlugins] = useState([]);
   const [selectedPlugin, setSelectedPlugin] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     const loadPlugins = async () => {
       try {
         setLoading(true);
-        const pluginList = await fetchPlugins();
+        // For demo purposes, we'll hardcode the plugins since the backend might not be ready
+        const pluginList = ["example_json", "postgres_table"];
+        // Uncomment below to fetch from API when backend is ready
+        // const pluginList = await fetchPlugins();
+        
         setPlugins(pluginList);
         
         // Auto-select the first plugin if available
@@ -46,14 +53,14 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Data Streaming Application</h1>
+        <h1>Real-time Data Streaming Dashboard</h1>
         <div className="connection-status">
-          Status: <span className={`status-${connectionStatus}`}>{connectionStatus}</span>
+          Connection Status: <span className={`status-${connectionStatus}`}>{connectionStatus}</span>
         </div>
       </header>
       <main>
         {loading ? (
-          <div className="loading">Loading plugins...</div>
+          <div className="loading">Loading data sources...</div>
         ) : error ? (
           <div className="error">{error}</div>
         ) : (
@@ -64,6 +71,20 @@ function App() {
                 selectedPlugin={selectedPlugin} 
                 onPluginChange={handlePluginChange} 
               />
+              <div className="view-toggles">
+                <button 
+                  className={!showDashboard ? 'active' : ''}
+                  onClick={() => setShowDashboard(false)}
+                >
+                  Data View
+                </button>
+                <button 
+                  className={showDashboard ? 'active' : ''}
+                  onClick={() => setShowDashboard(true)}
+                >
+                  Dashboard
+                </button>
+              </div>
             </div>
             
             {selectedPlugin && (
@@ -73,10 +94,17 @@ function App() {
               />
             )}
             
-            <DataVisualizer />
+            {showDashboard ? (
+              <DataDashboard data={data} />
+            ) : (
+              <DataVisualizer />
+            )}
           </>
         )}
       </main>
+      <footer className="App-footer">
+        <p>© {new Date().getFullYear()} Real-time Data Streaming</p>
+      </footer>
     </div>
   );
 }

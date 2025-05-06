@@ -5,12 +5,13 @@ import useWebSocket from '../hooks/useWebSocket';
 const DataStreamer = ({ pluginName, onStatusChange }) => {
   const { setStreamData, setStreamInfo, clearData } = useContext(DataContext);
   
+  // Fixed the WebSocket URL to match the backend endpoint
   const { 
     status, 
     messages, 
     connect, 
     disconnect 
-  } = useWebSocket(`ws://localhost:8000/ws/stream/${pluginName}`);
+  } = useWebSocket(`ws://localhost:8000/ws`);
   
   // Connect/disconnect when plugin changes
   useEffect(() => {
@@ -39,14 +40,18 @@ const DataStreamer = ({ pluginName, onStatusChange }) => {
     // Process only the newest message
     const message = messages[messages.length - 1];
     
-    if (message.type === 'info') {
-      setStreamInfo(message.data);
-    } else if (message.type === 'data') {
+    // Check if message contains data field
+    if (message.data) {
       setStreamData(message.data);
-    } else if (message.type === 'error') {
+    } else if (message.error) {
       console.error('Stream error:', message.error);
+    } else if (message.status === "connected") {
+      setStreamInfo({
+        type: pluginName,
+        status: "connected"
+      });
     }
-  }, [messages, setStreamData, setStreamInfo]);
+  }, [messages, setStreamData, setStreamInfo, pluginName]);
   
   return null; // This component doesn't render anything
 };
