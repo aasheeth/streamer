@@ -33,24 +33,25 @@ def list_plugins():
 
 @app.websocket("/ws")
 async def stream_data(websocket: WebSocket):
-    await websocket.accept()  
+    # Connect and accept the WebSocket connection
     await manager.connect(websocket)
-
+    
     try:
         plugin = registry.get_plugin("example_json")
         if not plugin:
             await websocket.send_text("Plugin not found.")
-            await websocket.close()
             return
 
-        await websocket.send_json({"status": "connected" })
+        # Now it's safe to send messages after connection is accepted
+        await websocket.send_json({"status": "connected"})
         
         async for chunk in plugin.get_data_stream(chunk_size=10):
             await websocket.send_json({"data": chunk})
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        pass  # Connection is already closed
     except Exception as e:
-        await websocket.send_json({"error": str(e)})
-    finally:
+        # Only send error if connection is still active
         if websocket in manager.active_connections:
-            manager.disconnect(websocket)
+            await websocket.send_json({"error": str(e)})
+    finally:
+        manager.disconnect(websocket)
