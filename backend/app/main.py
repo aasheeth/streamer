@@ -43,10 +43,14 @@ async def stream_data(websocket: WebSocket):
             await websocket.close()
             return
 
+        await websocket.send_json({"status": "connected" })
+        
         async for chunk in plugin.get_data_stream(chunk_size=10):
-            print(f"Sending chunk: {chunk}")
-            await manager.broadcast(message=str(chunk))
-
+            await websocket.send_json({"data": chunk})
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
+    except Exception as e:
+        await websocket.send_json({"error": str(e)})
+    finally:
+        if websocket in manager.active_connections:
+            manager.disconnect(websocket)
