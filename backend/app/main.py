@@ -33,16 +33,18 @@ def list_plugins():
 
 @app.websocket("/ws")
 async def stream_data(websocket: WebSocket):
+    await websocket.accept()  
     await manager.connect(websocket)
+
     try:
-        plugin = registry.get_plugin("example_json")  
+        plugin = registry.get_plugin("example_json")
         if not plugin:
-            await websocket.send_text(f"Pluginnot found.")
+            await websocket.send_text("Plugin not found.")
             await websocket.close()
             return
 
         async for chunk in plugin.get_data_stream(chunk_size=10):
-            print(f"Sending chunk: {chunk}")  
+            print(f"Sending chunk: {chunk}")
             await manager.broadcast(message=str(chunk))
 
     except WebSocketDisconnect:
