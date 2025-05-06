@@ -6,9 +6,7 @@ class ConnectionManager:
         self.active_connections: List[WebSocket] = []
         
     async def connect(self, websocket: WebSocket):
-        # Accept the connection first
         await websocket.accept()
-        # Then add to active connections
         self.active_connections.append(websocket)
         
     def disconnect(self, websocket: WebSocket):
