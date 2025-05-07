@@ -41,7 +41,7 @@ if not os.path.exists(sample_json_path):
 registry.register_plugin("sample_json", FileDataSourcePlugin(sample_json_path))
 
 try:
-    postgres_plugin = PostgresDataSourcePlugin("my_table")
+    postgres_plugin = PostgresDataSourcePlugin("dummy_data")
     source_info = postgres_plugin.get_source_info()
     if "error" not in source_info:
         registry.register_plugin("postgres_table", postgres_plugin)
