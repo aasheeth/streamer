@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 
 function App() {
-  // State for connection and data
   const [serverUrl, setServerUrl] = useState('ws://localhost:8000/ws/');
   const [plugins, setPlugins] = useState([]);
   const [selectedPlugin, setSelectedPlugin] = useState('');
@@ -16,13 +15,9 @@ function App() {
   const [isAutoScroll, setIsAutoScroll] = useState(true);
   const [logMessages, setLogMessages] = useState([]);
   const [isPluginsDropdownOpen, setIsPluginsDropdownOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('table'); // table, json, or cards
-  
-  // References
+  const [viewMode, setViewMode] = useState('table');
   const socketRef = useRef(null);
   const dataContainerRef = useRef(null);
-
-  // Add log entry
   const addLog = (message, type = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
     setLogMessages(prev => [{
@@ -30,10 +25,9 @@ function App() {
       timestamp,
       message,
       type
-    }, ...prev.slice(0, 99)]); // Keep last 100 log entries
+    }, ...prev.slice(0, 99)]); 
   };
 
-  // Fetch available plugins
   const fetchPlugins = async () => {
     try {
       const serverBase = serverUrl.replace('ws://', 'http://').replace('/ws/', '/');
@@ -58,7 +52,6 @@ function App() {
     }
   };
 
-  // Connect to WebSocket
   const connectToWebSocket = () => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       socketRef.current.close();
@@ -119,7 +112,6 @@ function App() {
     }
   };
 
-  // Disconnect WebSocket
   const disconnectWebSocket = () => {
     if (socketRef.current) {
       socketRef.current.close();
@@ -127,20 +119,16 @@ function App() {
     }
   };
 
-  // Auto-scroll effect
   useEffect(() => {
     if (isAutoScroll && dataContainerRef.current) {
       dataContainerRef.current.scrollTop = dataContainerRef.current.scrollHeight;
     }
   }, [dataStream, isAutoScroll]);
-
-  // Check for plugins when URL changes
   useEffect(() => {
     fetchPlugins();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverUrl]);
 
-  // Clean up on unmount
   useEffect(() => {
     return () => {
       if (socketRef.current) {
@@ -149,13 +137,10 @@ function App() {
     };
   }, []);
 
-  // Get table headers from data
   const getTableHeaders = () => {
     if (dataStream.length === 0) return [];
     return Object.keys(dataStream[0]);
   };
-
-  // Render connection status icon
   const renderStatusIcon = () => {
     switch (connectionStatus) {
       case 'connected':
@@ -168,8 +153,6 @@ function App() {
         return <XCircle className="w-5 h-5 text-gray-500" />;
     }
   };
-
-  // Get source icon based on type
   const getSourceIcon = () => {
     if (!sourceInfo) return <HelpCircle className="w-5 h-5" />;
     
@@ -179,8 +162,6 @@ function App() {
     }
     return <FileText className="w-5 h-5 text-green-500" />;
   };
-
-  // Render data based on view mode
   const renderData = () => {
     if (dataStream.length === 0) {
       return (
@@ -255,7 +236,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center">
@@ -281,7 +261,6 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Connection Controls */}
         <div className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 rounded-lg shadow mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <div className="flex-1 min-w-0">
@@ -384,7 +363,6 @@ function App() {
           </div>
         </div>
 
-        {/* Source Info */}
         <div className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 rounded-lg shadow mb-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
             {getSourceIcon()}
@@ -398,8 +376,6 @@ function App() {
             )}
           </div>
         </div>
-
-        {/* Data Display */}
         <div className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 rounded-lg shadow mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -464,8 +440,6 @@ function App() {
             {renderData()}
           </div>
         </div>
-
-        {/* Logs */}
         <div className="bg-white px-4 py-5 sm:px-6 rounded-lg shadow">
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Activity Log</h3>
           <div className="bg-gray-900 rounded-md p-4 text-gray-300 font-mono text-sm overflow-auto max-h-48">
